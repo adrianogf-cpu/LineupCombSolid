@@ -1,0 +1,8 @@
+# Exclude GH Pages dashboard from Vercel build
+docs/
+
+# Exclude Phase 1 standalone artifacts from Vercel build
+scripts/
+schema/
+*.pdf
+*.csv
