@@ -33,9 +33,7 @@ CREATE TABLE IF NOT EXISTS lineup_entries (
   carga                 TEXT,
   origem                TEXT,
   destino               TEXT,
-  afretador             TEXT,
-  CONSTRAINT lineup_entries_unique_per_report
-    UNIQUE (report_id, vessel_name_canonical, porto_cidade, porto_terminal)
+  afretador             TEXT
 );
 
 -- ---------------------------------------------------------------
