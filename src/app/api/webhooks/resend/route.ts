@@ -61,17 +61,38 @@ export async function POST(request: Request) {
   }
 
   // 6. Download attachment via Resend API
-  const { data: attachmentData } = await resend.emails.receiving.attachments.get({
-    emailId: event.data.email_id,
-    id: pdfAttachment.id,
-  });
+  let pdfBuffer: Buffer;
+  try {
+    const { data: attachmentData, error: attachmentError } = await resend.emails.receiving.attachments.get({
+      emailId: event.data.email_id,
+      id: pdfAttachment.id,
+    });
 
-  if (!attachmentData?.download_url) {
-    return Response.json({ error: 'Failed to get attachment download URL' }, { status: 500 });
+    if (attachmentError || !attachmentData?.download_url) {
+      console.error('Attachment API error:', { attachmentError, attachmentData, emailId: event.data.email_id, attachmentId: pdfAttachment.id });
+      return Response.json({
+        error: 'Failed to get attachment download URL',
+        detail: attachmentError?.message || 'No download_url in response',
+        emailId: event.data.email_id,
+        attachmentId: pdfAttachment.id,
+      }, { status: 500 });
+    }
+
+    const pdfResponse = await fetch(attachmentData.download_url);
+    if (!pdfResponse.ok) {
+      return Response.json({
+        error: 'Failed to download attachment',
+        detail: `HTTP ${pdfResponse.status} from download URL`,
+      }, { status: 500 });
+    }
+    pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+  } catch (e: any) {
+    console.error('Attachment download exception:', e);
+    return Response.json({
+      error: 'Exception downloading attachment',
+      detail: e.message,
+    }, { status: 500 });
   }
-
-  const pdfResponse = await fetch(attachmentData.download_url);
-  const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
 
   // 7. Ingest using shared logic
   const result = await ingestPdf(pdfBuffer, pdfAttachment.filename, 'email');
