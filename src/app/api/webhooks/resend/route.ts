@@ -64,42 +64,45 @@ export async function POST(request: Request) {
     console.warn(`Email has ${attachments.length} attachments, processing only first PDF`);
   }
 
-  // 6. Download attachment via Resend API
-  // Try both possible email ID field names: email_id, emailId, id
-  const emailId = event.data.email_id || event.data.emailId || event.data.id;
-  const attachmentId = pdfAttachment.id || pdfAttachment.attachment_id;
+  // 6. Download attachment via Resend REST API (direct fetch, more reliable than SDK)
+  const emailId = event.data.email_id;
+  const attachmentId = pdfAttachment.id;
 
   let pdfBuffer: Buffer;
   try {
-    const { data: attachmentData, error: attachmentError } = await resend.emails.receiving.attachments.get({
-      emailId,
-      id: attachmentId,
-    });
+    const apiRes = await fetch(
+      `https://api.resend.com/emails/receiving/${emailId}/attachments/${attachmentId}`,
+      { headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` } }
+    );
 
-    if (attachmentError || !attachmentData?.download_url) {
+    if (!apiRes.ok) {
+      const errBody = await apiRes.text();
       return Response.json({
-        error: 'Failed to get attachment download URL',
-        detail: attachmentError?.message || 'No download_url in response',
+        error: 'Resend attachment API failed',
+        status: apiRes.status,
+        detail: errBody,
         emailId,
         attachmentId,
-        debug: {
-          dataKeys: Object.keys(event.data),
-          attachmentKeys: Object.keys(pdfAttachment),
-          attachmentError,
-        },
+      }, { status: 500 });
+    }
+
+    const attachmentData = await apiRes.json();
+    if (!attachmentData?.download_url) {
+      return Response.json({
+        error: 'No download_url in attachment response',
+        attachmentData,
       }, { status: 500 });
     }
 
     const pdfResponse = await fetch(attachmentData.download_url);
     if (!pdfResponse.ok) {
       return Response.json({
-        error: 'Failed to download attachment',
-        detail: `HTTP ${pdfResponse.status} from download URL`,
+        error: 'Failed to download PDF from presigned URL',
+        detail: `HTTP ${pdfResponse.status}`,
       }, { status: 500 });
     }
     pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
   } catch (e: any) {
-    console.error('Attachment download exception:', e);
     return Response.json({
       error: 'Exception downloading attachment',
       detail: e.message,
