@@ -48,7 +48,7 @@ export function WeekPicker({ currentDate, availableDates }: WeekPickerProps) {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full items-center gap-2 sm:w-auto">
       <Button
         variant="outline"
         size="icon"
@@ -60,7 +60,7 @@ export function WeekPicker({ currentDate, availableDates }: WeekPickerProps) {
       </Button>
 
       <Select value={currentDate} onValueChange={navigateTo}>
-        <SelectTrigger className="w-[220px]">
+        <SelectTrigger className="w-full sm:w-[220px]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

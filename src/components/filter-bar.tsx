@@ -109,12 +109,12 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
   }
 
   return (
-    <div className="flex flex-wrap items-end gap-3">
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end sm:gap-3">
       {/* Port filter */}
       <div className="min-w-[160px]">
         <label className="mb-1 block text-xs text-muted-foreground">Porto</label>
         <Select value={porto} onValueChange={setPorto}>
-          <SelectTrigger className="h-9 text-sm">
+          <SelectTrigger className="h-10 text-sm">
             <SelectValue placeholder="Todos os portos" />
           </SelectTrigger>
           <SelectContent>
@@ -132,7 +132,7 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
       <div className="min-w-[160px]">
         <label className="mb-1 block text-xs text-muted-foreground">Carga</label>
         <Select value={carga} onValueChange={setCarga}>
-          <SelectTrigger className="h-9 text-sm">
+          <SelectTrigger className="h-10 text-sm">
             <SelectValue placeholder="Todas as cargas" />
           </SelectTrigger>
           <SelectContent>
@@ -152,7 +152,7 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
           Afretador
         </label>
         <Select value={afretador} onValueChange={setAfretador}>
-          <SelectTrigger className="h-9 text-sm">
+          <SelectTrigger className="h-10 text-sm">
             <SelectValue placeholder="Todos" />
           </SelectTrigger>
           <SelectContent>
@@ -179,7 +179,7 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
               key={item.value}
               variant={op === item.value ? "default" : "outline"}
               size="sm"
-              className="h-9 px-3 text-sm"
+              className="h-10 px-3 text-sm"
               onClick={() => setOp(item.value)}
             >
               {item.label}
@@ -199,7 +199,7 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
             placeholder="Nome do navio..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-9 pl-8 text-sm"
+            className="h-10 pl-8 text-sm"
           />
         </div>
       </div>
@@ -209,7 +209,7 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 text-sm"
+          className="h-10 text-sm"
           onClick={clearAll}
         >
           <X className="mr-1 h-3 w-3" />

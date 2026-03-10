@@ -120,14 +120,16 @@ export function LineupTable({ entries }: { entries: LineupEntry[] }) {
   }, [entries, sortColumn, sortDirection]);
 
   return (
-    <div className="overflow-x-auto rounded-md border">
+    <div className="overflow-x-auto rounded-md border" style={{ WebkitOverflowScrolling: "touch" }}>
       <Table>
         <TableHeader>
           <TableRow>
-            {COLUMNS.map((col) => (
+            {COLUMNS.map((col, idx) => (
               <TableHead
                 key={col.key}
-                className={`cursor-pointer select-none text-sm ${col.className ?? ""}`}
+                className={`cursor-pointer select-none text-xs sm:text-sm ${
+                  idx === 0 ? "sticky left-0 z-10 bg-background" : ""
+                } ${DATE_COLUMNS.has(col.key) || NUMBER_COLUMNS.has(col.key) ? "whitespace-nowrap" : ""} ${col.className ?? ""}`}
                 onClick={() => handleSort(col.key)}
               >
                 {col.label}
@@ -143,15 +145,15 @@ export function LineupTable({ entries }: { entries: LineupEntry[] }) {
         <TableBody>
           {sortedEntries.map((entry) => (
             <TableRow key={entry.id}>
-              <TableCell className="text-sm font-medium">
+              <TableCell className="sticky left-0 z-10 bg-background text-xs font-medium sm:text-sm">
                 {entry.vessel_name_canonical ?? entry.vessel_name_raw}
               </TableCell>
-              <TableCell className="text-sm">{entry.porto_cidade ?? "-"}</TableCell>
-              <TableCell className="text-sm">{entry.porto_terminal ?? "-"}</TableCell>
-              <TableCell className="text-sm">{formatDateShort(entry.eta)}</TableCell>
-              <TableCell className="text-sm">{formatDateShort(entry.etb)}</TableCell>
-              <TableCell className="text-sm">{formatDateShort(entry.ets)}</TableCell>
-              <TableCell className="text-sm">
+              <TableCell className="text-xs sm:text-sm">{entry.porto_cidade ?? "-"}</TableCell>
+              <TableCell className="text-xs sm:text-sm">{entry.porto_terminal ?? "-"}</TableCell>
+              <TableCell className="whitespace-nowrap text-xs sm:text-sm">{formatDateShort(entry.eta)}</TableCell>
+              <TableCell className="whitespace-nowrap text-xs sm:text-sm">{formatDateShort(entry.etb)}</TableCell>
+              <TableCell className="whitespace-nowrap text-xs sm:text-sm">{formatDateShort(entry.ets)}</TableCell>
+              <TableCell className="text-xs sm:text-sm">
                 {entry.op ? (
                   <Badge
                     className={
@@ -168,13 +170,13 @@ export function LineupTable({ entries }: { entries: LineupEntry[] }) {
                   "-"
                 )}
               </TableCell>
-              <TableCell className="text-right text-sm">
+              <TableCell className="whitespace-nowrap text-right text-xs sm:text-sm">
                 {formatQuantidade(entry.quantidade)}
               </TableCell>
-              <TableCell className="text-sm">{entry.carga ?? "-"}</TableCell>
-              <TableCell className="text-sm">{entry.origem ?? "-"}</TableCell>
-              <TableCell className="text-sm">{entry.destino ?? "-"}</TableCell>
-              <TableCell className="text-sm">{entry.afretador ?? "-"}</TableCell>
+              <TableCell className="text-xs sm:text-sm">{entry.carga ?? "-"}</TableCell>
+              <TableCell className="text-xs sm:text-sm">{entry.origem ?? "-"}</TableCell>
+              <TableCell className="text-xs sm:text-sm">{entry.destino ?? "-"}</TableCell>
+              <TableCell className="text-xs sm:text-sm">{entry.afretador ?? "-"}</TableCell>
             </TableRow>
           ))}
         </TableBody>
