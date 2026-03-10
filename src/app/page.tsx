@@ -1,7 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/server";
-import { LineupTable } from "@/components/lineup-table";
+import { DashboardClient } from "@/components/dashboard-client";
 import { WeekPicker } from "@/components/week-picker";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Ship, FileText } from "lucide-react";
 import type { LineupEntry } from "@/types/lineup";
 
@@ -97,24 +97,12 @@ export default async function Home({
           <p className="text-muted-foreground capitalize">{formattedDate}</p>
         </div>
 
-        <div className="flex items-center gap-4">
-          <Card className="py-3">
-            <CardContent className="flex items-center gap-2 px-4">
-              <Ship className="h-4 w-4 text-muted-foreground" />
-              <span className="text-2xl font-bold">
-                {report.vessel_count ?? lineupEntries.length}
-              </span>
-              <span className="text-sm text-muted-foreground">navios</span>
-            </CardContent>
-          </Card>
-
-          {report.filename && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <FileText className="h-3 w-3" />
-              <span className="max-w-[200px] truncate">{report.filename}</span>
-            </div>
-          )}
-        </div>
+        {report.filename && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <FileText className="h-3 w-3" />
+            <span className="max-w-[200px] truncate">{report.filename}</span>
+          </div>
+        )}
       </div>
 
       {/* Week Picker */}
@@ -125,9 +113,9 @@ export default async function Home({
         />
       </div>
 
-      {/* Table */}
+      {/* Dashboard: Filters + Summary + Table */}
       {lineupEntries.length > 0 ? (
-        <LineupTable entries={lineupEntries} />
+        <DashboardClient entries={lineupEntries} />
       ) : (
         <Card>
           <CardHeader>
