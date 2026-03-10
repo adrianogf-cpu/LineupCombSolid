@@ -3,26 +3,9 @@ import { LineupTable } from "@/components/lineup-table";
 import { WeekPicker } from "@/components/week-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Ship, FileText } from "lucide-react";
+import type { LineupEntry } from "@/types/lineup";
 
 export const dynamic = "force-dynamic";
-
-interface LineupEntry {
-  id: string;
-  report_id: string;
-  vessel_name_raw: string;
-  vessel_name_canonical: string | null;
-  porto_cidade: string | null;
-  porto_terminal: string | null;
-  eta: string | null;
-  etb: string | null;
-  ets: string | null;
-  op: string | null;
-  quantidade: number | null;
-  carga: string | null;
-  origem: string | null;
-  destino: string | null;
-  afretador: string | null;
-}
 
 interface LineupReport {
   id: string;
