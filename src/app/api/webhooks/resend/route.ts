@@ -48,33 +48,45 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Unauthorized sender' }, { status: 403 });
   }
 
-  // 5. Find PDF attachment
-  const pdfAttachment = event.data.attachments?.find(
-    (a: any) => a.filename?.toLowerCase().endsWith('.pdf')
+  // 5. Find PDF attachment — try both possible field names
+  const attachments = event.data.attachments || [];
+  const pdfAttachment = attachments.find(
+    (a: any) => (a.filename || a.name || '').toLowerCase().endsWith('.pdf')
   );
   if (!pdfAttachment) {
-    return Response.json({ error: 'No PDF attachment' });
+    return Response.json({
+      error: 'No PDF attachment',
+      debug: { attachments, dataKeys: Object.keys(event.data) },
+    });
   }
 
-  if (event.data.attachments.length > 1) {
-    console.warn(`Email has ${event.data.attachments.length} attachments, processing only first PDF`);
+  if (attachments.length > 1) {
+    console.warn(`Email has ${attachments.length} attachments, processing only first PDF`);
   }
 
   // 6. Download attachment via Resend API
+  // Try both possible email ID field names: email_id, emailId, id
+  const emailId = event.data.email_id || event.data.emailId || event.data.id;
+  const attachmentId = pdfAttachment.id || pdfAttachment.attachment_id;
+
   let pdfBuffer: Buffer;
   try {
     const { data: attachmentData, error: attachmentError } = await resend.emails.receiving.attachments.get({
-      emailId: event.data.email_id,
-      id: pdfAttachment.id,
+      emailId,
+      id: attachmentId,
     });
 
     if (attachmentError || !attachmentData?.download_url) {
-      console.error('Attachment API error:', { attachmentError, attachmentData, emailId: event.data.email_id, attachmentId: pdfAttachment.id });
       return Response.json({
         error: 'Failed to get attachment download URL',
         detail: attachmentError?.message || 'No download_url in response',
-        emailId: event.data.email_id,
-        attachmentId: pdfAttachment.id,
+        emailId,
+        attachmentId,
+        debug: {
+          dataKeys: Object.keys(event.data),
+          attachmentKeys: Object.keys(pdfAttachment),
+          attachmentError,
+        },
       }, { status: 500 });
     }
 
