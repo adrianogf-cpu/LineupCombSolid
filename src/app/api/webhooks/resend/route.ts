@@ -54,10 +54,7 @@ export async function POST(request: Request) {
     (a: any) => (a.filename || a.name || '').toLowerCase().endsWith('.pdf')
   );
   if (!pdfAttachment) {
-    return Response.json({
-      error: 'No PDF attachment',
-      debug: { attachments, dataKeys: Object.keys(event.data) },
-    });
+    return Response.json({ error: 'No PDF attachment' });
   }
 
   if (attachments.length > 1) {
