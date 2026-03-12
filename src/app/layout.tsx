@@ -31,17 +31,20 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <header className="border-b bg-background">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-            <Link href="/" className="flex items-center gap-2 font-semibold">
-              <Ship className="h-5 w-5" />
-              Lineup Dashboard
-            </Link>
-            <Link
-              href="/admin/upload"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Admin
-            </Link>
+          <div className="mx-auto max-w-7xl px-4">
+            {/* Top bar: logo + admin */}
+            <div className="flex items-center justify-between py-2">
+              <Link href="/" className="flex items-center gap-2 font-semibold">
+                <Ship className="h-5 w-5" />
+                <span className="hidden sm:inline">Lineup Dashboard</span>
+              </Link>
+              <Link
+                href="/admin/upload"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Admin
+              </Link>
+            </div>
           </div>
           <AnalyticsNav />
         </header>

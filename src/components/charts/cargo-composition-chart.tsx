@@ -44,6 +44,10 @@ function formatVolume(value: number): string {
   return String(value);
 }
 
+function formatVolumeCard(value: number): string {
+  return value.toLocaleString('pt-BR');
+}
+
 export function CargoCompositionChart({
   data,
   ports,
@@ -178,15 +182,15 @@ export function CargoCompositionChart({
           <h3 className="text-lg font-semibold mb-3">
             Volume por Tipo de Carga
           </h3>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {cargoSummary.map(({ cargo, volume }, i) => (
               <div
                 key={cargo}
-                className="rounded-lg border p-3 space-y-1"
+                className="rounded-lg border p-2 sm:p-3 space-y-0.5 sm:space-y-1"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <div
-                    className="h-3 w-3 shrink-0 rounded-sm"
+                    className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0 rounded-sm"
                     style={{
                       backgroundColor:
                         CARGO_COLORS[
@@ -194,14 +198,16 @@ export function CargoCompositionChart({
                         ],
                     }}
                   />
-                  <span className="text-sm font-medium truncate">
+                  <span className="text-xs sm:text-sm font-medium truncate">
                     {cargo}
                   </span>
                 </div>
-                <p className="text-base sm:text-xl font-bold tabular-nums">
-                  {volume.toLocaleString('pt-BR')} MT
+                <p className="text-sm sm:text-xl font-bold tabular-nums">
+                  <span className="sm:hidden">{formatVolume(volume)}</span>
+                  <span className="hidden sm:inline">{formatVolumeCard(volume)}</span>
+                  {' '}<span className="text-xs font-normal">MT</span>
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
                   #{i + 1} por volume
                 </p>
               </div>
