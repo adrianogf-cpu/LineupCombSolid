@@ -30,16 +30,20 @@ export default async function Home({
     .select("report_date")
     .order("report_date", { ascending: false });
 
-  const availableDates = (reportDates ?? []).map((r) => r.report_date);
+  const availableDates = (reportDates ?? []).map((r) => r.report_date.slice(0, 10));
 
   // Fetch the target report
   let report: LineupReport | null = null;
 
   if (date) {
+    // date is YYYY-MM-DD, report_date may be timestamptz — filter by date range
+    const dateStart = `${date.slice(0, 10)}T00:00:00`;
+    const dateEnd = `${date.slice(0, 10)}T23:59:59`;
     const { data } = await supabase
       .from("lineup_reports")
       .select("id, report_date, filename, vessel_count")
-      .eq("report_date", date)
+      .gte("report_date", dateStart)
+      .lte("report_date", dateEnd)
       .limit(1)
       .single();
     report = data;
@@ -139,7 +143,7 @@ export default async function Home({
       {/* Week Picker */}
       <div className="mb-4 sm:mb-6">
         <WeekPicker
-          currentDate={report.report_date}
+          currentDate={report.report_date.slice(0, 10)}
           availableDates={availableDates}
         />
       </div>
