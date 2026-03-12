@@ -4,6 +4,8 @@ import { WeekPicker } from "@/components/week-picker";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Ship, FileText } from "lucide-react";
 import type { LineupEntry } from "@/types/lineup";
+import { fetchDiffEntries, fetchPreviousReport } from "@/lib/supabase/queries";
+import type { DiffEntry } from "@/types/diff";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +19,7 @@ interface LineupReport {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ date?: string; diff?: string; compare?: string; minor?: string }>;
 }) {
   const { date } = await searchParams;
   const supabase = createServiceClient();
@@ -77,6 +79,35 @@ export default async function Home({
 
   const lineupEntries: LineupEntry[] = entries ?? [];
 
+  // Diff mode
+  let diffEntries: DiffEntry[] | null = null;
+  const isDiffMode = (await searchParams).diff === '1';
+  const compareParam = (await searchParams).compare;
+  const showMinor = (await searchParams).minor === '1';
+
+  if (isDiffMode && report) {
+    try {
+      let compareReportId: string | null = null;
+      if (compareParam) {
+        const { data: compareReport } = await supabase
+          .from('lineup_reports')
+          .select('id')
+          .eq('report_date', compareParam)
+          .limit(1)
+          .single();
+        compareReportId = compareReport?.id ?? null;
+      } else {
+        const prev = await fetchPreviousReport(supabase, report.report_date);
+        compareReportId = prev?.id ?? null;
+      }
+      if (compareReportId) {
+        diffEntries = await fetchDiffEntries(supabase, compareReportId, report.id);
+      }
+    } catch (e) {
+      console.error('Diff fetch failed:', e);
+    }
+  }
+
   // Format date for display
   const reportDate = new Date(report.report_date + "T12:00:00Z");
   const formattedDate = reportDate.toLocaleDateString("pt-BR", {
@@ -115,7 +146,15 @@ export default async function Home({
 
       {/* Dashboard: Filters + Summary + Table */}
       {lineupEntries.length > 0 ? (
-        <DashboardClient entries={lineupEntries} />
+        <DashboardClient
+          entries={lineupEntries}
+          diffEntries={diffEntries}
+          isDiffMode={isDiffMode}
+          showMinor={showMinor}
+          compareDate={compareParam ?? null}
+          availableDates={availableDates}
+          reportDate={report.report_date}
+        />
       ) : (
         <Card>
           <CardHeader>

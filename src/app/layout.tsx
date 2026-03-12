@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { Ship } from "lucide-react";
+import { AnalyticsNav } from "@/components/analytics-nav";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,7 +30,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <nav className="border-b bg-background">
+        <header className="border-b bg-background">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Ship className="h-5 w-5" />
@@ -42,7 +43,8 @@ export default function RootLayout({
               Admin
             </Link>
           </div>
-        </nav>
+          <AnalyticsNav />
+        </header>
         {children}
       </body>
     </html>

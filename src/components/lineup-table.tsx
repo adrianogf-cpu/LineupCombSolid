@@ -11,7 +11,10 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { LineupEntry } from "@/types/lineup";
+import type { DiffEntry } from "@/types/diff";
+import { diffRowClass, diffCellClass } from "@/types/diff";
 
 type SortDirection = "asc" | "desc" | null;
 type SortColumn = keyof LineupEntry | null;
@@ -96,7 +99,20 @@ function SortIcon({ column, sortColumn, sortDirection }: {
   return <ArrowDown className="ml-1 inline h-3 w-3" />;
 }
 
-export function LineupTable({ entries }: { entries: LineupEntry[] }) {
+function EtaShiftBadge({ days }: { days: number | null }) {
+  if (!days || days === 0) return null;
+  const label = days > 0 ? `+${days}d` : `${days}d`;
+  const color = days > 0 ? "text-red-600" : "text-green-600";
+  return <span className={`ml-1 text-[10px] font-semibold ${color}`}>({label})</span>;
+}
+
+interface LineupTableProps {
+  entries: LineupEntry[];
+  diffEntries?: DiffEntry[] | null;
+  isDiffMode?: boolean;
+}
+
+export function LineupTable({ entries, diffEntries, isDiffMode }: LineupTableProps) {
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
@@ -112,15 +128,42 @@ export function LineupTable({ entries }: { entries: LineupEntry[] }) {
     }
   }
 
+  // Use diff entries as data source when in diff mode
+  const displayData = useMemo(() => {
+    if (isDiffMode && diffEntries && diffEntries.length > 0) {
+      return diffEntries as unknown as LineupEntry[];
+    }
+    return entries;
+  }, [isDiffMode, diffEntries, entries]);
+
   const sortedEntries = useMemo(() => {
-    if (!sortColumn || !sortDirection) return entries;
-    return [...entries].sort((a, b) =>
+    if (!sortColumn || !sortDirection) return displayData;
+    return [...displayData].sort((a, b) =>
       compareValues(a, b, sortColumn, sortDirection)
     );
-  }, [entries, sortColumn, sortDirection]);
+  }, [displayData, sortColumn, sortDirection]);
+
+  // Helper to get diff entry for current row
+  const getDiffEntry = (entry: LineupEntry): DiffEntry | undefined => {
+    if (!isDiffMode || !diffEntries) return undefined;
+    return entry as unknown as DiffEntry;
+  };
 
   return (
     <div className="overflow-x-auto rounded-md border" style={{ WebkitOverflowScrolling: "touch" }}>
+      {isDiffMode && diffEntries && (
+        <div className="flex gap-4 border-b px-4 py-2 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <span className="inline-block h-3 w-3 rounded bg-green-200 dark:bg-green-900" /> Novo
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="inline-block h-3 w-3 rounded bg-red-200 dark:bg-red-900" /> Removido
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="inline-block h-3 w-3 rounded bg-yellow-200 dark:bg-yellow-900" /> Campo alterado
+          </span>
+        </div>
+      )}
       <Table>
         <TableHeader>
           <TableRow>
@@ -143,42 +186,76 @@ export function LineupTable({ entries }: { entries: LineupEntry[] }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedEntries.map((entry) => (
-            <TableRow key={entry.id}>
-              <TableCell className="sticky left-0 z-10 bg-background text-xs font-medium sm:text-sm">
-                {entry.vessel_name_canonical ?? entry.vessel_name_raw}
-              </TableCell>
-              <TableCell className="text-xs sm:text-sm">{entry.porto_cidade ?? "-"}</TableCell>
-              <TableCell className="text-xs sm:text-sm">{entry.porto_terminal ?? "-"}</TableCell>
-              <TableCell className="whitespace-nowrap text-xs sm:text-sm">{formatDateShort(entry.eta)}</TableCell>
-              <TableCell className="whitespace-nowrap text-xs sm:text-sm">{formatDateShort(entry.etb)}</TableCell>
-              <TableCell className="whitespace-nowrap text-xs sm:text-sm">{formatDateShort(entry.ets)}</TableCell>
-              <TableCell className="text-xs sm:text-sm">
-                {entry.op ? (
-                  <Badge
-                    className={
-                      entry.op.toUpperCase() === "L"
-                        ? "bg-green-600 text-white hover:bg-green-700"
-                        : entry.op.toUpperCase() === "D"
-                          ? "bg-blue-600 text-white hover:bg-blue-700"
-                          : ""
-                    }
-                  >
-                    {entry.op.toUpperCase()}
-                  </Badge>
-                ) : (
-                  "-"
-                )}
-              </TableCell>
-              <TableCell className="whitespace-nowrap text-right text-xs sm:text-sm">
-                {formatQuantidade(entry.quantidade)}
-              </TableCell>
-              <TableCell className="text-xs sm:text-sm">{entry.carga ?? "-"}</TableCell>
-              <TableCell className="text-xs sm:text-sm">{entry.origem ?? "-"}</TableCell>
-              <TableCell className="text-xs sm:text-sm">{entry.destino ?? "-"}</TableCell>
-              <TableCell className="text-xs sm:text-sm">{entry.afretador ?? "-"}</TableCell>
-            </TableRow>
-          ))}
+          {sortedEntries.map((entry, rowIdx) => {
+            const diff = getDiffEntry(entry);
+            return (
+              <TableRow
+                key={entry.id ?? `diff-${rowIdx}`}
+                className={cn(isDiffMode && diff && diffRowClass(diff.diff_status))}
+              >
+                <TableCell className={cn(
+                  "sticky left-0 z-10 bg-background text-xs font-medium sm:text-sm",
+                  isDiffMode && diff && diffCellClass("vessel_name_canonical", diff.fields_changed)
+                )}>
+                  {entry.vessel_name_canonical ?? entry.vessel_name_raw}
+                  {isDiffMode && diff?.diff_status === "REMOVED" && (
+                    <Badge variant="outline" className="ml-1 text-[10px] border-red-300 text-red-600">saiu</Badge>
+                  )}
+                  {isDiffMode && diff?.diff_status === "ADDED" && (
+                    <Badge variant="outline" className="ml-1 text-[10px] border-green-300 text-green-600">novo</Badge>
+                  )}
+                </TableCell>
+                <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("porto_cidade", diff.fields_changed))}>
+                  {entry.porto_cidade ?? "-"}
+                </TableCell>
+                <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("porto_terminal", diff.fields_changed))}>
+                  {entry.porto_terminal ?? "-"}
+                </TableCell>
+                <TableCell className={cn("whitespace-nowrap text-xs sm:text-sm", isDiffMode && diff && diffCellClass("eta", diff.fields_changed))}>
+                  {formatDateShort(entry.eta)}
+                  {isDiffMode && diff && <EtaShiftBadge days={diff.eta_shifted_days} />}
+                </TableCell>
+                <TableCell className={cn("whitespace-nowrap text-xs sm:text-sm", isDiffMode && diff && diffCellClass("etb", diff.fields_changed))}>
+                  {formatDateShort(entry.etb)}
+                </TableCell>
+                <TableCell className={cn("whitespace-nowrap text-xs sm:text-sm", isDiffMode && diff && diffCellClass("ets", diff.fields_changed))}>
+                  {formatDateShort(entry.ets)}
+                </TableCell>
+                <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("op", diff.fields_changed))}>
+                  {entry.op ? (
+                    <Badge
+                      className={
+                        entry.op.toUpperCase() === "L"
+                          ? "bg-green-600 text-white hover:bg-green-700"
+                          : entry.op.toUpperCase() === "D"
+                            ? "bg-blue-600 text-white hover:bg-blue-700"
+                            : ""
+                      }
+                    >
+                      {entry.op.toUpperCase()}
+                    </Badge>
+                  ) : (
+                    "-"
+                  )}
+                </TableCell>
+                <TableCell className={cn("whitespace-nowrap text-right text-xs sm:text-sm", isDiffMode && diff && diffCellClass("quantidade", diff.fields_changed))}>
+                  {formatQuantidade(entry.quantidade)}
+                </TableCell>
+                <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("carga", diff.fields_changed))}>
+                  {entry.carga ?? "-"}
+                </TableCell>
+                <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("origem", diff.fields_changed))}>
+                  {entry.origem ?? "-"}
+                </TableCell>
+                <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("destino", diff.fields_changed))}>
+                  {entry.destino ?? "-"}
+                </TableCell>
+                <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("afretador", diff.fields_changed))}>
+                  {entry.afretador ?? "-"}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
