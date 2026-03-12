@@ -29,7 +29,7 @@ export default async function PortTrendsPage() {
   const reportCount = dates.length;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-4 sm:py-8">
+    <main className="mx-auto max-w-7xl px-5 sm:px-6 py-4 sm:py-8">
     <div className="space-y-4 sm:space-y-6">
       <div>
         <h1 className="text-xl sm:text-2xl font-bold">Tendencias por Porto</h1>
