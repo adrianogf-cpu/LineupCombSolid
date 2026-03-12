@@ -12,10 +12,9 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 function formatDatePtBR(isoDate: string): string {
-  const d = new Date(isoDate + "T12:00:00Z");
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const year = d.getUTCFullYear();
+  // Handle both "2026-01-28" and "2026-01-28T03:00:00+00:00" formats
+  const dateOnly = isoDate.slice(0, 10);
+  const [year, month, day] = dateOnly.split("-");
   return `${day}/${month}/${year}`;
 }
 

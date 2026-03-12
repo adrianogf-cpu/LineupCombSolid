@@ -109,7 +109,7 @@ export default async function Home({
   }
 
   // Format date for display
-  const reportDate = new Date(report.report_date + "T12:00:00Z");
+  const reportDate = new Date(report.report_date.slice(0, 10) + "T12:00:00Z");
   const formattedDate = reportDate.toLocaleDateString("pt-BR", {
     weekday: "long",
     day: "2-digit",
