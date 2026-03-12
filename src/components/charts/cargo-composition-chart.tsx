@@ -136,7 +136,7 @@ export function CargoCompositionChart({
       </div>
 
       {/* Stacked bar chart */}
-      <ChartContainer config={chartConfig} className="min-h-[400px] w-full">
+      <ChartContainer config={chartConfig} className="h-[350px] w-full">
         <BarChart data={pivotedData} accessibilityLayer>
           <CartesianGrid vertical={false} />
           <XAxis
@@ -160,12 +160,12 @@ export function CargoCompositionChart({
             }
           />
           <ChartLegend content={<ChartLegendContent />} />
-          {cargoTypes.map((cargo) => (
+          {cargoTypes.map((cargo, i) => (
             <Bar
               key={cargo}
               dataKey={cargo}
               stackId="cargo"
-              fill={`var(--color-${cargo})`}
+              fill={CARGO_COLORS[i % CARGO_COLORS.length]}
               radius={0}
             />
           ))}
