@@ -41,32 +41,32 @@ export function SummaryCards({ entries }: { entries: LineupEntry[] }) {
   }, [entries]);
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <Card className="py-3">
-        <CardContent className="flex items-center gap-3 px-4">
-          <Ship className="h-5 w-5 text-muted-foreground" />
+    <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4">
+      <Card className="py-2 sm:py-3">
+        <CardContent className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4">
+          <Ship className="hidden sm:block h-5 w-5 text-muted-foreground" />
           <div>
-            <p className="text-2xl font-bold">{stats.totalNavios}</p>
+            <p className="text-lg sm:text-2xl font-bold">{stats.totalNavios}</p>
             <p className="text-xs text-muted-foreground">Total navios</p>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="py-3">
-        <CardContent className="flex items-center gap-3 px-4">
-          <MapPin className="h-5 w-5 text-muted-foreground" />
+      <Card className="py-2 sm:py-3">
+        <CardContent className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4">
+          <MapPin className="hidden sm:block h-5 w-5 text-muted-foreground" />
           <div>
-            <p className="text-2xl font-bold">{stats.portos}</p>
+            <p className="text-lg sm:text-2xl font-bold">{stats.portos}</p>
             <p className="text-xs text-muted-foreground">Portos</p>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="py-3">
-        <CardContent className="flex items-center gap-3 px-4">
-          <ArrowLeftRight className="h-5 w-5 text-muted-foreground" />
+      <Card className="py-2 sm:py-3">
+        <CardContent className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4">
+          <ArrowLeftRight className="hidden sm:block h-5 w-5 text-muted-foreground" />
           <div>
-            <p className="text-2xl font-bold">
+            <p className="text-lg sm:text-2xl font-bold">
               <span className="text-green-600">{stats.loading}L</span>
               {" / "}
               <span className="text-blue-600">{stats.discharge}D</span>
@@ -76,11 +76,11 @@ export function SummaryCards({ entries }: { entries: LineupEntry[] }) {
         </CardContent>
       </Card>
 
-      <Card className="py-3">
-        <CardContent className="flex items-center gap-3 px-4">
-          <Package className="h-5 w-5 text-muted-foreground" />
+      <Card className="py-2 sm:py-3">
+        <CardContent className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4">
+          <Package className="hidden sm:block h-5 w-5 text-muted-foreground" />
           <div>
-            <p className="text-2xl font-bold truncate max-w-[140px]" title={stats.topCarga}>
+            <p className="text-lg sm:text-2xl font-bold truncate max-w-[100px] sm:max-w-[140px]" title={stats.topCarga}>
               {stats.topCarga}
             </p>
             <p className="text-xs text-muted-foreground">

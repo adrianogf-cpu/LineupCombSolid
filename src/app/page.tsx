@@ -118,14 +118,14 @@ export default async function Home({
   });
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main className="mx-auto max-w-7xl px-4 py-4 sm:py-8">
       {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 sm:mb-6 flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
             Lineup de Navios
           </h1>
-          <p className="text-muted-foreground capitalize">{formattedDate}</p>
+          <p className="text-sm text-muted-foreground capitalize">{formattedDate}</p>
         </div>
 
         {report.filename && (
@@ -137,7 +137,7 @@ export default async function Home({
       </div>
 
       {/* Week Picker */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <WeekPicker
           currentDate={report.report_date}
           availableDates={availableDates}

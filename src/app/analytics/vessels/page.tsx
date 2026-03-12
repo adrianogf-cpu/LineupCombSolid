@@ -27,9 +27,10 @@ export default async function VesselsPage({
   }
 
   return (
-    <div className="space-y-6">
+    <main className="mx-auto max-w-7xl px-4 py-4 sm:py-8">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Timeline de Navios</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">Timeline de Navios</h1>
         <p className="text-muted-foreground text-sm">
           Pesquise um navio para ver seu historico completo no lineup
         </p>
@@ -41,5 +42,6 @@ export default async function VesselsPage({
         <VesselTimelineTable entries={entries} query={query} />
       )}
     </div>
+    </main>
   );
 }

@@ -68,21 +68,22 @@ interface ColumnDef {
   key: keyof LineupEntry;
   label: string;
   className?: string;
+  hideOnMobile?: boolean;
 }
 
 const COLUMNS: ColumnDef[] = [
   { key: "vessel_name_canonical", label: "Navio" },
   { key: "porto_cidade", label: "Porto" },
-  { key: "porto_terminal", label: "Terminal" },
+  { key: "porto_terminal", label: "Terminal", hideOnMobile: true },
   { key: "eta", label: "ETA" },
-  { key: "etb", label: "ETB" },
-  { key: "ets", label: "ETS" },
+  { key: "etb", label: "ETB", hideOnMobile: true },
+  { key: "ets", label: "ETS", hideOnMobile: true },
   { key: "op", label: "OP" },
-  { key: "quantidade", label: "Qtd", className: "text-right" },
+  { key: "quantidade", label: "Qtd", className: "text-right", hideOnMobile: true },
   { key: "carga", label: "Carga" },
-  { key: "origem", label: "Origem" },
-  { key: "destino", label: "Destino" },
-  { key: "afretador", label: "Afretador" },
+  { key: "origem", label: "Origem", hideOnMobile: true },
+  { key: "destino", label: "Destino", hideOnMobile: true },
+  { key: "afretador", label: "Afretador", hideOnMobile: true },
 ];
 
 function SortIcon({ column, sortColumn, sortDirection }: {
@@ -170,9 +171,13 @@ export function LineupTable({ entries, diffEntries, isDiffMode }: LineupTablePro
             {COLUMNS.map((col, idx) => (
               <TableHead
                 key={col.key}
-                className={`cursor-pointer select-none text-xs sm:text-sm ${
-                  idx === 0 ? "sticky left-0 z-10 bg-background" : ""
-                } ${DATE_COLUMNS.has(col.key) || NUMBER_COLUMNS.has(col.key) ? "whitespace-nowrap" : ""} ${col.className ?? ""}`}
+                className={cn(
+                  "cursor-pointer select-none text-xs sm:text-sm",
+                  idx === 0 && "sticky left-0 z-10 bg-background",
+                  (DATE_COLUMNS.has(col.key) || NUMBER_COLUMNS.has(col.key)) && "whitespace-nowrap",
+                  col.hideOnMobile && "hidden sm:table-cell",
+                  col.className
+                )}
                 onClick={() => handleSort(col.key)}
               >
                 {col.label}
@@ -208,17 +213,17 @@ export function LineupTable({ entries, diffEntries, isDiffMode }: LineupTablePro
                 <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("porto_cidade", diff.fields_changed))}>
                   {entry.porto_cidade ?? "-"}
                 </TableCell>
-                <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("porto_terminal", diff.fields_changed))}>
+                <TableCell className={cn("hidden sm:table-cell text-xs sm:text-sm", isDiffMode && diff && diffCellClass("porto_terminal", diff.fields_changed))}>
                   {entry.porto_terminal ?? "-"}
                 </TableCell>
                 <TableCell className={cn("whitespace-nowrap text-xs sm:text-sm", isDiffMode && diff && diffCellClass("eta", diff.fields_changed))}>
                   {formatDateShort(entry.eta)}
                   {isDiffMode && diff && <EtaShiftBadge days={diff.eta_shifted_days} />}
                 </TableCell>
-                <TableCell className={cn("whitespace-nowrap text-xs sm:text-sm", isDiffMode && diff && diffCellClass("etb", diff.fields_changed))}>
+                <TableCell className={cn("hidden sm:table-cell whitespace-nowrap text-xs sm:text-sm", isDiffMode && diff && diffCellClass("etb", diff.fields_changed))}>
                   {formatDateShort(entry.etb)}
                 </TableCell>
-                <TableCell className={cn("whitespace-nowrap text-xs sm:text-sm", isDiffMode && diff && diffCellClass("ets", diff.fields_changed))}>
+                <TableCell className={cn("hidden sm:table-cell whitespace-nowrap text-xs sm:text-sm", isDiffMode && diff && diffCellClass("ets", diff.fields_changed))}>
                   {formatDateShort(entry.ets)}
                 </TableCell>
                 <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("op", diff.fields_changed))}>
@@ -238,19 +243,19 @@ export function LineupTable({ entries, diffEntries, isDiffMode }: LineupTablePro
                     "-"
                   )}
                 </TableCell>
-                <TableCell className={cn("whitespace-nowrap text-right text-xs sm:text-sm", isDiffMode && diff && diffCellClass("quantidade", diff.fields_changed))}>
+                <TableCell className={cn("hidden sm:table-cell whitespace-nowrap text-right text-xs sm:text-sm", isDiffMode && diff && diffCellClass("quantidade", diff.fields_changed))}>
                   {formatQuantidade(entry.quantidade)}
                 </TableCell>
                 <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("carga", diff.fields_changed))}>
                   {entry.carga ?? "-"}
                 </TableCell>
-                <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("origem", diff.fields_changed))}>
+                <TableCell className={cn("hidden sm:table-cell text-xs sm:text-sm", isDiffMode && diff && diffCellClass("origem", diff.fields_changed))}>
                   {entry.origem ?? "-"}
                 </TableCell>
-                <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("destino", diff.fields_changed))}>
+                <TableCell className={cn("hidden sm:table-cell text-xs sm:text-sm", isDiffMode && diff && diffCellClass("destino", diff.fields_changed))}>
                   {entry.destino ?? "-"}
                 </TableCell>
-                <TableCell className={cn("text-xs sm:text-sm", isDiffMode && diff && diffCellClass("afretador", diff.fields_changed))}>
+                <TableCell className={cn("hidden sm:table-cell text-xs sm:text-sm", isDiffMode && diff && diffCellClass("afretador", diff.fields_changed))}>
                   {entry.afretador ?? "-"}
                 </TableCell>
               </TableRow>

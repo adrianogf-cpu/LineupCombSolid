@@ -20,9 +20,10 @@ export default async function CargoPage() {
     .sort();
 
   return (
-    <div className="space-y-6">
+    <main className="mx-auto max-w-7xl px-4 py-4 sm:py-8">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Composicao de Carga</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">Composicao de Carga</h1>
         <p className="text-muted-foreground text-sm">
           Distribuicao de tipos de carga por porto ao longo do tempo
         </p>
@@ -36,5 +37,6 @@ export default async function CargoPage() {
 
       <CargoCompositionChart data={rows} ports={ports} />
     </div>
+    </main>
   );
 }

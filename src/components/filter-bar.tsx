@@ -109,113 +109,118 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end sm:gap-3">
-      {/* Port filter */}
-      <div className="min-w-[160px]">
-        <label className="mb-1 block text-xs text-muted-foreground">Porto</label>
-        <Select value={porto} onValueChange={setPorto}>
-          <SelectTrigger className="h-10 text-sm">
-            <SelectValue placeholder="Todos os portos" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Todos os portos</SelectItem>
-            {portos.map((p) => (
-              <SelectItem key={p} value={p}>
-                {p}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+    <div className="space-y-2 sm:space-y-0 sm:flex sm:flex-row sm:flex-wrap sm:items-end sm:gap-3">
+      {/* Dropdowns row - 2 columns on mobile */}
+      <div className="grid grid-cols-2 gap-2 sm:contents">
+        {/* Port filter */}
+        <div className="sm:min-w-[160px]">
+          <label className="mb-1 block text-xs text-muted-foreground">Porto</label>
+          <Select value={porto} onValueChange={setPorto}>
+            <SelectTrigger className="h-9 text-sm">
+              <SelectValue placeholder="Todos os portos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Todos os portos</SelectItem>
+              {portos.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {p}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      {/* Cargo filter */}
-      <div className="min-w-[160px]">
-        <label className="mb-1 block text-xs text-muted-foreground">Carga</label>
-        <Select value={carga} onValueChange={setCarga}>
-          <SelectTrigger className="h-10 text-sm">
-            <SelectValue placeholder="Todas as cargas" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Todas as cargas</SelectItem>
-            {cargas.map((c) => (
-              <SelectItem key={c} value={c}>
-                {c}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        {/* Cargo filter */}
+        <div className="sm:min-w-[160px]">
+          <label className="mb-1 block text-xs text-muted-foreground">Carga</label>
+          <Select value={carga} onValueChange={setCarga}>
+            <SelectTrigger className="h-9 text-sm">
+              <SelectValue placeholder="Todas as cargas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Todas as cargas</SelectItem>
+              {cargas.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {c}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      {/* Afretador filter */}
-      <div className="min-w-[160px]">
-        <label className="mb-1 block text-xs text-muted-foreground">
-          Afretador
-        </label>
-        <Select value={afretador} onValueChange={setAfretador}>
-          <SelectTrigger className="h-10 text-sm">
-            <SelectValue placeholder="Todos" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Todos</SelectItem>
-            {afretadores.map((a) => (
-              <SelectItem key={a} value={a}>
-                {a}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        {/* Afretador filter */}
+        <div className="sm:min-w-[160px]">
+          <label className="mb-1 block text-xs text-muted-foreground">
+            Afretador
+          </label>
+          <Select value={afretador} onValueChange={setAfretador}>
+            <SelectTrigger className="h-9 text-sm">
+              <SelectValue placeholder="Todos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Todos</SelectItem>
+              {afretadores.map((a) => (
+                <SelectItem key={a} value={a}>
+                  {a}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      {/* OP toggle */}
-      <div>
-        <label className="mb-1 block text-xs text-muted-foreground">OP</label>
-        <div className="flex gap-1">
-          {[
-            { value: ALL, label: "All" },
-            { value: "L", label: "L" },
-            { value: "D", label: "D" },
-          ].map((item) => (
-            <Button
-              key={item.value}
-              variant={op === item.value ? "default" : "outline"}
-              size="sm"
-              className="h-10 px-3 text-sm"
-              onClick={() => setOp(item.value)}
-            >
-              {item.label}
-            </Button>
-          ))}
+        {/* OP toggle */}
+        <div>
+          <label className="mb-1 block text-xs text-muted-foreground">OP</label>
+          <div className="flex gap-1">
+            {[
+              { value: ALL, label: "All" },
+              { value: "L", label: "L" },
+              { value: "D", label: "D" },
+            ].map((item) => (
+              <Button
+                key={item.value}
+                variant={op === item.value ? "default" : "outline"}
+                size="sm"
+                className="h-9 px-3 text-sm"
+                onClick={() => setOp(item.value)}
+              >
+                {item.label}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Vessel search */}
-      <div className="min-w-[200px]">
-        <label className="mb-1 block text-xs text-muted-foreground">
-          Buscar navio
-        </label>
-        <div className="relative">
-          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Nome do navio..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-10 pl-8 text-sm"
-          />
+      {/* Search + Clear row */}
+      <div className="flex items-end gap-2 sm:contents">
+        <div className="flex-1 sm:min-w-[200px]">
+          <label className="mb-1 block text-xs text-muted-foreground">
+            Buscar navio
+          </label>
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Nome do navio..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-9 pl-8 text-sm"
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Clear all */}
-      {hasActiveFilters && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-10 text-sm"
-          onClick={clearAll}
-        >
-          <X className="mr-1 h-3 w-3" />
-          Limpar
-        </Button>
-      )}
+        {/* Clear all */}
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 shrink-0 text-sm"
+            onClick={clearAll}
+          >
+            <X className="mr-1 h-3 w-3" />
+            Limpar
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

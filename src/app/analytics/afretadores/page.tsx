@@ -28,9 +28,10 @@ export default async function AfretadoresPage({
     const entries = (data as VesselTimelineRow[] | null) ?? [];
 
     return (
-      <div className="space-y-6">
+      <main className="mx-auto max-w-7xl px-4 py-4 sm:py-8">
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Rastreador de Afretadores</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Rastreador de Afretadores</h1>
           <p className="text-muted-foreground text-sm">
             Historico completo do afretador no lineup
           </p>
@@ -46,6 +47,7 @@ export default async function AfretadoresPage({
           <AfretadorDataTable data={entries} afretadorName={query} />
         )}
       </div>
+      </main>
     );
   }
 
@@ -59,9 +61,10 @@ export default async function AfretadoresPage({
   const afretadores = (topAfretadores as AfretadorSummaryRow[] | null) ?? [];
 
   return (
-    <div className="space-y-6">
+    <main className="mx-auto max-w-7xl px-4 py-4 sm:py-8">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Rastreador de Afretadores</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">Rastreador de Afretadores</h1>
         <p className="text-muted-foreground text-sm">
           Busque por afretador ou explore os mais ativos no lineup
         </p>
@@ -79,7 +82,7 @@ export default async function AfretadoresPage({
               <Link
                 key={a.afretador}
                 href={`/analytics/afretadores?q=${encodeURIComponent(a.afretador)}`}
-                className="block rounded-lg border p-4 transition-colors hover:bg-muted/50"
+                className="block rounded-lg border p-3 sm:p-4 transition-colors hover:bg-muted/50"
               >
                 <p className="font-semibold">{a.afretador}</p>
                 <div className="text-muted-foreground mt-1 grid grid-cols-2 gap-x-4 text-sm">
@@ -103,6 +106,7 @@ export default async function AfretadoresPage({
         </p>
       )}
     </div>
+    </main>
   );
 }
 

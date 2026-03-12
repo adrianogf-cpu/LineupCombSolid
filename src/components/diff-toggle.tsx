@@ -35,7 +35,7 @@ export function DiffToggle({
           checked={isDiffMode}
           onCheckedChange={onToggleDiff}
         />
-        <Label htmlFor="diff-toggle">Comparar com semana anterior</Label>
+        <Label htmlFor="diff-toggle" className="text-sm">Comparar com semana anterior</Label>
       </div>
       {isDiffMode && counts && (
         <>

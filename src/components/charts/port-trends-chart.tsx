@@ -110,7 +110,7 @@ export function PortTrendsChart({ data }: PortTrendsChartProps) {
   const activePorts = rankedPorts.filter((p) => selectedPorts.has(p));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Port selector */}
       <div className="flex flex-wrap gap-2">
         <button
@@ -145,10 +145,10 @@ export function PortTrendsChart({ data }: PortTrendsChartProps) {
 
       {/* Vessel count chart */}
       <div>
-        <h3 className="mb-2 text-lg font-semibold">
+        <h3 className="mb-2 text-base sm:text-lg font-semibold">
           Navios por Porto ao Longo do Tempo
         </h3>
-        <ChartContainer config={chartConfig} className="h-[300px] w-full">
+        <ChartContainer config={chartConfig} className="h-[220px] sm:h-[300px] w-full">
           <LineChart data={vesselData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="report_date" tick={{ fontSize: 12 }} />
@@ -172,10 +172,10 @@ export function PortTrendsChart({ data }: PortTrendsChartProps) {
 
       {/* Volume chart */}
       <div>
-        <h3 className="mb-2 text-lg font-semibold">
+        <h3 className="mb-2 text-base sm:text-lg font-semibold">
           Volume de Carga por Porto (MT)
         </h3>
-        <ChartContainer config={chartConfig} className="h-[300px] w-full">
+        <ChartContainer config={chartConfig} className="h-[220px] sm:h-[300px] w-full">
           <LineChart data={volumeData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="report_date" tick={{ fontSize: 12 }} />

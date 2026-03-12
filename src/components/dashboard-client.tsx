@@ -102,7 +102,7 @@ export function DashboardClient({
   }, [router]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <FilterBar entries={entries} onFilter={handleFilter} />
       <DiffToggle
         isDiffMode={isDiffMode}

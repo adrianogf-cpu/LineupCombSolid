@@ -136,7 +136,7 @@ export function CargoCompositionChart({
       </div>
 
       {/* Stacked bar chart */}
-      <ChartContainer config={chartConfig} className="h-[350px] w-full">
+      <ChartContainer config={chartConfig} className="h-[260px] sm:h-[350px] w-full">
         <BarChart data={pivotedData} accessibilityLayer>
           <CartesianGrid vertical={false} />
           <XAxis
@@ -198,7 +198,7 @@ export function CargoCompositionChart({
                     {cargo}
                   </span>
                 </div>
-                <p className="text-xl font-bold tabular-nums">
+                <p className="text-base sm:text-xl font-bold tabular-nums">
                   {volume.toLocaleString('pt-BR')} MT
                 </p>
                 <p className="text-xs text-muted-foreground">
