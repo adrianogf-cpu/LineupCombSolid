@@ -148,7 +148,7 @@ export function PortTrendsChart({ data }: PortTrendsChartProps) {
         <h3 className="mb-2 text-lg font-semibold">
           Navios por Porto ao Longo do Tempo
         </h3>
-        <ChartContainer config={chartConfig} className="min-h-[400px] w-full">
+        <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <LineChart data={vesselData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="report_date" tick={{ fontSize: 12 }} />
@@ -160,7 +160,7 @@ export function PortTrendsChart({ data }: PortTrendsChartProps) {
                 key={port}
                 type="monotone"
                 dataKey={port}
-                stroke={`var(--color-${port})`}
+                stroke={COLORS[rankedPorts.indexOf(port) % COLORS.length]}
                 strokeWidth={2}
                 dot={false}
                 connectNulls
@@ -175,7 +175,7 @@ export function PortTrendsChart({ data }: PortTrendsChartProps) {
         <h3 className="mb-2 text-lg font-semibold">
           Volume de Carga por Porto (MT)
         </h3>
-        <ChartContainer config={chartConfig} className="min-h-[400px] w-full">
+        <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <LineChart data={volumeData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="report_date" tick={{ fontSize: 12 }} />
@@ -192,7 +192,7 @@ export function PortTrendsChart({ data }: PortTrendsChartProps) {
                 key={port}
                 type="monotone"
                 dataKey={port}
-                stroke={`var(--color-${port})`}
+                stroke={COLORS[rankedPorts.indexOf(port) % COLORS.length]}
                 strokeWidth={2}
                 dot={false}
                 connectNulls
