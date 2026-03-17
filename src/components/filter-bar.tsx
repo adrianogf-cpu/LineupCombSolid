@@ -24,6 +24,7 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
   const [porto, setPorto] = useState(ALL);
   const [carga, setCarga] = useState(ALL);
   const [afretador, setAfretador] = useState(ALL);
+  const [origem, setOrigem] = useState(ALL);
   const [op, setOp] = useState(ALL);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -59,6 +60,12 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
     return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
   }, [entries]);
 
+  const origens = useMemo(() => {
+    const set = new Set<string>();
+    entries.forEach((e) => e.origem && set.add(e.origem));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [entries]);
+
   // Apply filters
   const applyFilters = useCallback(() => {
     let filtered = entries;
@@ -71,6 +78,9 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
     }
     if (afretador !== ALL) {
       filtered = filtered.filter((e) => e.afretador === afretador);
+    }
+    if (origem !== ALL) {
+      filtered = filtered.filter((e) => e.origem === origem);
     }
     if (op !== ALL) {
       filtered = filtered.filter(
@@ -86,7 +96,7 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
     }
 
     onFilter(filtered);
-  }, [entries, porto, carga, afretador, op, debouncedSearch, onFilter]);
+  }, [entries, porto, carga, afretador, origem, op, debouncedSearch, onFilter]);
 
   useEffect(() => {
     applyFilters();
@@ -96,6 +106,7 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
     porto !== ALL ||
     carga !== ALL ||
     afretador !== ALL ||
+    origem !== ALL ||
     op !== ALL ||
     search.trim() !== "";
 
@@ -103,6 +114,7 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
     setPorto(ALL);
     setCarga(ALL);
     setAfretador(ALL);
+    setOrigem(ALL);
     setOp(ALL);
     setSearch("");
     setDebouncedSearch("");
@@ -162,6 +174,26 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
               {afretadores.map((a) => (
                 <SelectItem key={a} value={a}>
                   {a}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Origem filter */}
+        <div className="sm:min-w-[160px]">
+          <label className="mb-1 block text-xs text-muted-foreground">
+            Origem
+          </label>
+          <Select value={origem} onValueChange={setOrigem}>
+            <SelectTrigger className="h-9 text-sm">
+              <SelectValue placeholder="Todas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Todas</SelectItem>
+              {origens.map((o) => (
+                <SelectItem key={o} value={o}>
+                  {o}
                 </SelectItem>
               ))}
             </SelectContent>
