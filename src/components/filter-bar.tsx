@@ -124,15 +124,15 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
     <div className="space-y-2 sm:space-y-0 sm:flex sm:flex-row sm:flex-wrap sm:items-end sm:gap-3">
       {/* Dropdowns row - 2 columns on mobile */}
       <div className="grid grid-cols-2 gap-2 sm:contents">
-        {/* Port filter */}
+        {/* Destino filter */}
         <div className="sm:min-w-[160px]">
-          <label className="mb-1 block text-xs text-muted-foreground">Porto</label>
+          <label className="mb-1 block text-xs text-muted-foreground">Destino</label>
           <Select value={porto} onValueChange={setPorto}>
             <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder="Todos os portos" />
+              <SelectValue placeholder="Todos os destinos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ALL}>Todos os portos</SelectItem>
+              <SelectItem value={ALL}>Todos os destinos</SelectItem>
               {portos.map((p) => (
                 <SelectItem key={p} value={p}>
                   {p}
@@ -187,10 +187,10 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
           </label>
           <Select value={origem} onValueChange={setOrigem}>
             <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder="Todas" />
+              <SelectValue placeholder="Todas as origens" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ALL}>Todas</SelectItem>
+              <SelectItem value={ALL}>Todas as origens</SelectItem>
               {origens.map((o) => (
                 <SelectItem key={o} value={o}>
                   {o}
