@@ -145,6 +145,7 @@ tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
         <select id="filterPorto"><option value="">Filtrar por Porto</option></select>
         <select id="filterAfretador"><option value="">Filtrar por Afretador</option></select>
         <select id="filterProduto"><option value="">Filtrar por Produto</option></select>
+        <select id="filterPais"><option value="">Filtrar por País de Origem</option></select>
         <input type="text" id="searchBox" placeholder="Buscar...">
       </div>
       <div style="overflow-x:auto;">
@@ -232,12 +233,39 @@ const data = [
   {porto:"Vila do Conde",navio:"Happy Dynamic",eta:"2026-02-18",etb:"2026-02-24",ets:"2026-02-27",op:"D",quantidade:15000,produto:"Petcoke",origem:"TBI",afretador:"Albras"},
 ];
 
+// ===== COUNTRY MAPPING =====
+const origemPais = {
+  'China': 'China',
+  'Houston': 'EUA',
+  'Santiago de Tolu': 'Colômbia',
+  'Barranquilla': 'Colômbia',
+  'Dalrymple Bay': 'Austrália',
+  'Prince Rupert': 'Canadá',
+  'Bahudopi': 'Indonésia',
+  'Mobile': 'EUA',
+  'Cartagena': 'Colômbia',
+  'Santa Marta': 'Colômbia',
+  'Port Arthur': 'EUA',
+  'Boston': 'EUA',
+  'Norfolk': 'EUA',
+  'Baltimore': 'EUA',
+  'Guayaquil': 'Equador',
+  'Pecem': 'Brasil',
+  'USA': 'EUA',
+  'Colombia': 'Colômbia',
+  'Tianjin': 'China',
+  'Vitória': 'Brasil',
+  'TBI': 'TBI',
+};
+data.forEach(d => { d.pais = origemPais[d.origem] || d.origem; });
+
 // ===== COMPUTED METRICS =====
 const totalNavios = data.length;
 const totalCarga = data.reduce((s,d) => s + d.quantidade, 0);
 const portos = [...new Set(data.map(d => d.porto))];
 const afretadores = [...new Set(data.map(d => d.afretador))];
 const produtos = [...new Set(data.map(d => d.produto))];
+const paises = [...new Set(data.map(d => d.pais))];
 
 // ===== SUMMARY =====
 document.getElementById('summaryContainer').innerHTML = [
@@ -371,6 +399,7 @@ function populateFilters() {
   addOpts('filterPorto', portos);
   addOpts('filterAfretador', afretadores);
   addOpts('filterProduto', produtos);
+  addOpts('filterPais', paises);
 }
 populateFilters();
 
@@ -378,12 +407,14 @@ function applyFilters() {
   const fp = document.getElementById('filterPorto').value;
   const fa = document.getElementById('filterAfretador').value;
   const fprod = document.getElementById('filterProduto').value;
+  const fpais = document.getElementById('filterPais').value;
   const search = document.getElementById('searchBox').value.toLowerCase();
 
   filtered = data.filter(d => {
     if (fp && d.porto !== fp) return false;
     if (fa && d.afretador !== fa) return false;
     if (fprod && d.produto !== fprod) return false;
+    if (fpais && d.pais !== fpais) return false;
     if (search && !Object.values(d).some(v => String(v).toLowerCase().includes(search))) return false;
     return true;
   });
@@ -455,7 +486,7 @@ document.querySelectorAll('thead th').forEach(th => {
 });
 
 // Filter events
-['filterPorto','filterAfretador','filterProduto'].forEach(id => {
+['filterPorto','filterAfretador','filterProduto','filterPais'].forEach(id => {
   document.getElementById(id).addEventListener('change', applyFilters);
 });
 document.getElementById('searchBox').addEventListener('input', applyFilters);
