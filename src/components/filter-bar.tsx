@@ -201,7 +201,7 @@ export function FilterBar({ entries, onFilter }: FilterBarProps) {
         </div>
 
         {/* OP toggle */}
-        <div>
+        <div className="sm:min-w-fit">
           <label className="mb-1 block text-xs text-muted-foreground">OP</label>
           <div className="flex gap-1">
             {[
