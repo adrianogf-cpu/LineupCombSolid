@@ -37,14 +37,34 @@ export default async function PeriodoPage({
   // Filter by REPORT date: include every entry from reports received within the
   // selected window, then deduplicate so a vessel listed across several reports
   // is counted once. A 1-day window ≈ that report's contents (deduplicated).
-  const { data, error } = await supabase
-    .from("v_vessel_timeline")
-    .select("*")
-    .gte("report_date", from)
-    .lte("report_date", to)
-    .order("report_date", { ascending: false });
+  //
+  // PostgREST caps each response at 1000 rows, so a wide window (thousands of
+  // entries) would silently drop the oldest reports. Paginate with .range()
+  // using a deterministic ordering so no boundary rows are skipped.
+  const PAGE = 1000;
+  const rows: VesselTimelineRow[] = [];
+  let error: { message: string } | null = null;
+  for (let offset = 0; offset < 200_000; offset += PAGE) {
+    const { data, error: pageError } = await supabase
+      .from("v_vessel_timeline")
+      .select("*")
+      .gte("report_date", from)
+      .lte("report_date", to)
+      .order("report_date", { ascending: false })
+      .order("vessel_name_canonical", { ascending: true })
+      .order("porto_cidade", { ascending: true })
+      .order("op", { ascending: true })
+      .order("eta", { ascending: true })
+      .range(offset, offset + PAGE - 1);
 
-  const rows = (data as VesselTimelineRow[] | null) ?? [];
+    if (pageError) {
+      error = pageError;
+      break;
+    }
+    const batch = (data as VesselTimelineRow[] | null) ?? [];
+    rows.push(...batch);
+    if (batch.length < PAGE) break;
+  }
 
   // Deduplicate across the window's reports: keep the most recent snapshot
   // (rows are sorted report_date DESC → first occurrence of each key is latest).
