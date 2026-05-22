@@ -48,9 +48,17 @@ export default async function PeriodoPage({
 
   // Deduplicate across the window's reports: keep the most recent snapshot
   // (rows are sorted report_date DESC → first occurrence of each key is latest).
+  // A named vessel is identified by name+port+op. Placeholders (TBN/TBA) share
+  // the same name, so distinct voyages would collapse and be lost — for those we
+  // key on the stable voyage attributes (cargo, origin, charterer, quantity).
   const seen = new Map<string, VesselTimelineRow>();
   for (const r of rows) {
-    const key = `${r.vessel_name_canonical ?? ""}|${r.porto_cidade ?? ""}|${r.op ?? ""}`;
+    const name = (r.vessel_name_canonical ?? "").trim().toUpperCase();
+    const base = `${name}|${r.porto_cidade ?? ""}|${r.op ?? ""}`;
+    const isPlaceholder = name === "" || name === "TBN" || name === "TBA";
+    const key = isPlaceholder
+      ? `${base}|${r.carga ?? ""}|${r.origem ?? ""}|${r.afretador ?? ""}|${r.quantidade ?? ""}`
+      : base;
     if (!seen.has(key)) seen.set(key, r);
   }
 
@@ -103,8 +111,9 @@ export default async function PeriodoPage({
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>
             Janela pela data do relatório (todos os relatórios recebidos no
-            intervalo). Navios sem nome definido (&ldquo;TBN&rdquo;) no mesmo
-            porto/operação são agrupados e podem ser subestimados.
+            intervalo). Navios sem nome (&ldquo;TBN&rdquo;) são distinguidos por
+            carga, origem, afretador e quantidade; placeholders idênticos ainda
+            podem ser agrupados.
           </span>
         </div>
 
