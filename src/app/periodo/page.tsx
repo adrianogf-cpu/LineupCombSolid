@@ -19,15 +19,6 @@ function formatPtBR(iso: string): string {
   return `${d}/${m}/${y}`;
 }
 
-/**
- * The operational date used to decide whether a vessel "operated" within the
- * selected window. ETB (berthing = start of operation) is the best proxy for
- * when cargo was actually loaded/discharged; fall back to ETA, then ETS.
- */
-function opDate(r: VesselTimelineRow): string | null {
-  return r.etb ?? r.eta ?? r.ets ?? null;
-}
-
 export default async function PeriodoPage({
   searchParams,
 }: {
@@ -43,28 +34,22 @@ export default async function PeriodoPage({
 
   const supabase = createServiceClient();
 
-  // Back-buffer on report_date: a vessel operating near `from` may have its last
-  // snapshot in a report dated a few days earlier (reports arrive ~2x/week).
-  const fromBuffer = toISO(
-    new Date(new Date(from + "T00:00:00Z").getTime() - 14 * 86_400_000)
-  );
-
+  // Filter by REPORT date: include every entry from reports received within the
+  // selected window, then deduplicate so a vessel listed across several reports
+  // is counted once. A 1-day window ≈ that report's contents (deduplicated).
   const { data, error } = await supabase
     .from("v_vessel_timeline")
     .select("*")
-    .gte("report_date", fromBuffer)
+    .gte("report_date", from)
     .lte("report_date", to)
     .order("report_date", { ascending: false });
 
   const rows = (data as VesselTimelineRow[] | null) ?? [];
 
-  // Deduplicate across reports: keep the most recent snapshot (rows are sorted
-  // report_date DESC, so the first occurrence of each key is the latest) of
-  // every vessel whose operation date falls inside the selected window.
+  // Deduplicate across the window's reports: keep the most recent snapshot
+  // (rows are sorted report_date DESC → first occurrence of each key is latest).
   const seen = new Map<string, VesselTimelineRow>();
   for (const r of rows) {
-    const od = opDate(r);
-    if (!od || od < from || od > to) continue;
     const key = `${r.vessel_name_canonical ?? ""}|${r.porto_cidade ?? ""}|${r.op ?? ""}`;
     if (!seen.has(key)) seen.set(key, r);
   }
@@ -88,7 +73,7 @@ export default async function PeriodoPage({
       afretador: r.afretador,
     }))
     .sort((a, b) =>
-      (a.etb ?? a.eta ?? "").localeCompare(b.etb ?? b.eta ?? "")
+      (a.eta ?? a.etb ?? "").localeCompare(b.eta ?? b.etb ?? "")
     );
 
   return (
@@ -100,9 +85,9 @@ export default async function PeriodoPage({
             Análise por Período
           </h1>
           <p className="text-sm text-muted-foreground">
-            Navios consolidados de {formatPtBR(from)} a {formatPtBR(to)} — cada
-            navio aparece uma única vez (snapshot mais recente). Use os filtros
-            de Carga e OP abaixo.
+            Navios consolidados dos relatórios de {formatPtBR(from)} a{" "}
+            {formatPtBR(to)} — cada navio aparece uma única vez (snapshot mais
+            recente). Use os filtros de Carga e OP abaixo.
           </p>
         </div>
 
@@ -117,9 +102,9 @@ export default async function PeriodoPage({
         <div className="flex items-start gap-2 rounded-md border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>
-            Período pela data de operação (ETB → ETA → ETS). Navios sem nome
-            definido (&ldquo;TBN&rdquo;) no mesmo porto/operação são agrupados e
-            podem ser subestimados.
+            Janela pela data do relatório (todos os relatórios recebidos no
+            intervalo). Navios sem nome definido (&ldquo;TBN&rdquo;) no mesmo
+            porto/operação são agrupados e podem ser subestimados.
           </span>
         </div>
 
@@ -129,7 +114,7 @@ export default async function PeriodoPage({
           <Card>
             <CardHeader>
               <CardTitle className="text-center text-muted-foreground">
-                Nenhum navio operou neste período
+                Nenhum relatório encontrado neste período
               </CardTitle>
             </CardHeader>
           </Card>
