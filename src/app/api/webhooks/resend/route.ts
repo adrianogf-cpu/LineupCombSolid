@@ -13,6 +13,15 @@ function getAllowedSenders() {
     .filter(Boolean);
 }
 
+// Entries starting with "@" allow a whole domain (e.g. "@orionrodos.com"),
+// so a new sender at the same company isn't silently rejected.
+function isAllowedSender(email: string, allowed: string[]) {
+  const domain = email.slice(email.lastIndexOf('@'));
+  return allowed.some(entry =>
+    entry.startsWith('@') ? domain === entry : email === entry
+  );
+}
+
 export async function POST(request: Request) {
   const resend = getResend();
   const allowedSenders = getAllowedSenders();
@@ -43,7 +52,7 @@ export async function POST(request: Request) {
 
   // 4. Validate sender
   const senderEmail = extractEmail(event.data.from).toLowerCase();
-  if (!allowedSenders.includes(senderEmail)) {
+  if (!isAllowedSender(senderEmail, allowedSenders)) {
     await logRejectedEmail(senderEmail, event.data.subject);
     return Response.json({ error: 'Unauthorized sender' }, { status: 403 });
   }
