@@ -79,6 +79,31 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // A rejected sender is only logged by the webhook, so a new address at the
+  // supplier would otherwise stop ingestion silently.
+  if (shouldAlert) {
+    const since = new Date(Date.now() - 25 * 3_600_000).toISOString();
+    const { data: rejected } = await supabase
+      .from('ingestion_log')
+      .select('created_at, error_message')
+      .eq('status', 'rejected')
+      .gte('created_at', since)
+      .order('created_at', { ascending: false });
+
+    if (rejected && rejected.length > 0) {
+      await sendAlert(
+        'Lineup: e-mail de remetente não autorizado',
+        `${rejected.length} e-mail(s) foram rejeitados nas últimas 24h por ` +
+          `remetente fora de ALLOWED_SENDERS. Se for o lineup, inclua o ` +
+          `endereço (ou "@dominio") na variável na Vercel e reenvie o PDF ` +
+          `pelo Admin → Upload.\n\n` +
+          rejected
+            .map(r => `- ${r.created_at.slice(0, 16)}: ${r.error_message}`)
+            .join('\n')
+      );
+    }
+  }
+
   return Response.json({
     ok: true,
     timestamp: new Date().toISOString(),
