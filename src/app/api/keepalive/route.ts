@@ -113,21 +113,28 @@ export async function GET(request: NextRequest) {
 }
 
 async function sendAlert(subject: string, text: string) {
-  const to = process.env.ALERT_EMAIL;
-  if (!to) {
+  const recipients = (process.env.ALERT_EMAIL || '')
+    .split(/[,;]/)
+    .map(s => s.trim())
+    .filter(Boolean);
+  if (recipients.length === 0) {
     console.error(`[keepalive] ${subject} (ALERT_EMAIL not set)`);
     return;
   }
-  try {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const { error } = await resend.emails.send({
-      from: process.env.ALERT_FROM || 'Lineup Dashboard <onboarding@resend.dev>',
-      to,
-      subject,
-      text,
-    });
-    if (error) console.error('[keepalive] alert email failed:', error.message);
-  } catch (e) {
-    console.error('[keepalive] alert email failed:', e);
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  // One send per recipient: Resend rejects the whole request if any address
+  // is not allowed (e.g. no verified domain), which would silence everyone.
+  for (const to of recipients) {
+    try {
+      const { error } = await resend.emails.send({
+        from: process.env.ALERT_FROM || 'Lineup Dashboard <onboarding@resend.dev>',
+        to,
+        subject,
+        text,
+      });
+      if (error) console.error(`[keepalive] alert to ${to} failed:`, error.message);
+    } catch (e) {
+      console.error(`[keepalive] alert to ${to} failed:`, e);
+    }
   }
 }
