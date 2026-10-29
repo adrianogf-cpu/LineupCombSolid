@@ -25,10 +25,33 @@ export default async function Home({
   const supabase = createServiceClient();
 
   // Fetch available report dates for picker
-  const { data: reportDates } = await supabase
+  const { data: reportDates, error: datesError } = await supabase
     .from("lineup_reports")
     .select("report_date")
     .order("report_date", { ascending: false });
+
+  // Database unreachable (e.g. Supabase project paused) — don't pretend it's empty
+  if (datesError) {
+    console.error("Failed to load reports:", datesError.message);
+    return (
+      <main className="mx-auto max-w-7xl px-4 py-8">
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <Ship className="h-16 w-16 text-destructive" />
+          <h2 className="mt-4 text-2xl font-semibold">
+            Erro ao conectar no banco de dados
+          </h2>
+          <p className="mt-2 max-w-md text-muted-foreground">
+            Os relatórios não puderam ser carregados. Verifique se o projeto
+            no Supabase está ativo (projetos gratuitos são pausados por
+            inatividade).
+          </p>
+          <p className="mt-4 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            {datesError.message.slice(0, 200)}
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   const availableDates = (reportDates ?? []).map((r) => r.report_date.slice(0, 10));
 
