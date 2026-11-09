@@ -104,12 +104,45 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Resend disables a webhook after repeated failed deliveries; from then on
+  // e-mails reach Resend but never the app, without any error on our side.
+  if (shouldAlert) {
+    const webhookProblem = await checkResendWebhook();
+    if (webhookProblem) {
+      await sendAlert(
+        'Lineup: webhook do Resend inativo',
+        `${webhookProblem}\n\nOs e-mails com o lineup chegam ao Resend mas não ` +
+          `ao dashboard. Reative em https://resend.com/webhooks e suba os ` +
+          `relatórios perdidos (ficam em Emails → Receiving).`
+      );
+    }
+  }
+
   return Response.json({
     ok: true,
     timestamp: new Date().toISOString(),
     latest_report: latestReport,
     days_since_report: daysSinceReport,
   });
+}
+
+async function checkResendWebhook(): Promise<string | null> {
+  try {
+    const res = await fetch('https://api.resend.com/webhooks', {
+      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+    });
+    if (!res.ok) return null; // can't tell; don't alert on Resend API hiccups
+    const { data } = (await res.json()) as {
+      data: { endpoint: string; status: string; events: string[] }[];
+    };
+    const inbound = data.filter(w => w.events.includes('email.received'));
+    if (inbound.length === 0) return 'Nenhum webhook de e-mail recebido configurado no Resend.';
+    if (inbound.some(w => w.status === 'enabled')) return null;
+    return `Webhook ${inbound.map(w => `${w.endpoint} (${w.status})`).join(', ')}.`;
+  } catch (e) {
+    console.error('[keepalive] webhook check failed:', e);
+    return null;
+  }
 }
 
 async function sendAlert(subject: string, text: string) {
