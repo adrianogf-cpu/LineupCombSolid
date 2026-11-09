@@ -13,7 +13,11 @@ interface PositionedItem {
 
 const CHAR_WIDTH = 3.6; // PDF points per character column — calibrated against Callidus Lineup PDFs
 
-function reconstructLayout(items: any[], viewportHeight: number, fixedLeftMargin?: number): string {
+function reconstructLayout(
+  items: any[],
+  viewportHeight: number,
+  fixedLeftMargin?: number
+): { text: string; leftMargin?: number } {
   const textItems: PositionedItem[] = items
     .filter((item: any) => item.str != null && item.str !== '')
     .map((item: any) => ({
@@ -24,7 +28,7 @@ function reconstructLayout(items: any[], viewportHeight: number, fixedLeftMargin
       height: Math.abs(item.transform[3]) || Math.abs(item.transform[0]) || 8,
     }));
 
-  if (!textItems.length) return '';
+  if (!textItems.length) return { text: '', leftMargin: fixedLeftMargin };
 
   // Use fixed left margin if provided (computed from page 1 for consistency).
   // Otherwise, compute from this page's content items.
@@ -89,7 +93,7 @@ function reconstructLayout(items: any[], viewportHeight: number, fixedLeftMargin
     return line;
   });
 
-  return lines.join('\n');
+  return { text: lines.join('\n'), leftMargin };
 }
 
 async function extractLayoutText(pdfBuffer: Buffer | Uint8Array): Promise<string> {
@@ -102,31 +106,14 @@ async function extractLayoutText(pdfBuffer: Buffer | Uint8Array): Promise<string
     const page = await pdf.getPage(i);
     const viewport = page.getViewport({ scale: 1 });
     const content = await page.getTextContent();
-    const text = reconstructLayout(content.items, viewport.height, leftMargin);
+    const { text, leftMargin: usedMargin } =
+      reconstructLayout(content.items, viewport.height, leftMargin);
     pageTexts.push(text);
 
-    // After page 1, capture the left margin for consistency across pages
-    if (i === 1 && !leftMargin) {
-      // Re-derive: find the leftMargin that was used
-      const items = content.items
-        .filter((item: any) => item.str != null && item.str !== '')
-        .map((item: any) => ({ x: item.transform[4] }));
-      // The mode computation ran inside reconstructLayout for page 1;
-      // replicate it here to capture the value
-      const rowMinX: number[] = [];
-      const sorted = [...items].sort((a, b) => a.x - b.x);
-      // Simple: use the most common x rounded to 0.1
-      const xCounts = new Map<number, number>();
-      for (const it of items) {
-        const r = Math.round(it.x * 10) / 10;
-        xCounts.set(r, (xCounts.get(r) || 0) + 1);
-      }
-      let bestX = 0, bestCount = 0;
-      for (const [x, count] of xCounts) {
-        if (count > bestCount) { bestCount = count; bestX = x; }
-      }
-      leftMargin = bestX;
-    }
+    // Reuse page 1's margin (mode of each row's leftmost x) on later pages.
+    // A mode over all items is skewed by wrapped Afretador/Origem lines and
+    // can land on a data column, which glues every row on pages 2+ together.
+    if (leftMargin == null) leftMargin = usedMargin;
   }
 
   pdf.destroy();
