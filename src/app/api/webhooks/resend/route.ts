@@ -54,7 +54,10 @@ export async function POST(request: Request) {
   const senderEmail = extractEmail(event.data.from).toLowerCase();
   if (!isAllowedSender(senderEmail, allowedSenders)) {
     await logRejectedEmail(senderEmail, event.data.subject);
-    return Response.json({ error: 'Unauthorized sender' }, { status: 403 });
+    // 200, not 403: Resend retries non-2xx responses and disables the webhook
+    // after repeated failures, which silently stopped ingestion in Oct/2026.
+    // The rejection is logged and reported by the daily keepalive alert.
+    return Response.json({ status: 'rejected', error: 'Unauthorized sender' });
   }
 
   // 5. Find PDF attachment — try both possible field names
